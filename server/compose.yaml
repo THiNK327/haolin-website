@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    env_file: .env
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    volumes:
+      - playground-data:/data
+    ports:
+      - '127.0.0.1:8000:8000'
+    cpus: 1
+    mem_limit: 2g
+    pids_limit: 64
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  playground-data:
