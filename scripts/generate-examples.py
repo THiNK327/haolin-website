@@ -11,19 +11,33 @@ def vm(ls):
  return {'type':'FeatureCollection','properties':{'image':{'height_px':256,'width_px':256}},'features':[{'type':'Feature','geometry':{'type':'LineString','coordinates':line},'properties':{'name':f'branch-{i}','width_mm':[0]+[8+((j%3)*2) for j in range(len(line)-2)]+[0]}} for i,line in enumerate(ls)]}
 gt=vm(lines)
 cases=[]
-for key,label,desc in [('missing','Missing branch','One branch is absent from the testing map. Unmatched crack length contributes to the difference score.'),('identical','Identical maps','The same vector map is used twice: all four attributes agree.'),('shift','Small displacement','All testing segments are shifted three pixels to the right, while the reference stays fixed.'),('extra','Extra branch','An additional, disconnected segment appears in the testing map. It is counted as unmatched length.')]:
+for key,label,desc in [('missing','Missing branch','One branch is absent from the testing map. Unmatched crack length contributes to the difference score.'),('identical','Identical maps','The same vector map is used twice: all four attributes agree.'),('shift','Small displacement','All testing segments are shifted three pixels to the right, while the reference stays fixed.'),('extra','Extra branch','An additional, disconnected segment appears in the testing map. It is counted as unmatched length.'),('growth','Wider & longer','Existing cracks widen and extend at their tips. The original paths stay in place; no disconnected crack is added. Widths are doubled along existing nonzero-width points. This is a synthetic growth example, not a deterioration forecast.')]:
  test=copy.deepcopy(gt)
  if key=='missing':test['features'].pop(2)
  if key=='shift':
   for f in test['features']:
    for p in f['geometry']['coordinates']:p[1]+=3
  if key=='extra':test['features']+=vm([[[35,40],[57,45],[77,33],[100,42]]])['features']
+ if key=='growth':
+  extensions=[[[243,127],[251,125]],[[48,232],[53,247]],[[154,25],[143,9]],[[164,230],[171,247]]]
+  for f,extension in zip(test['features'],extensions):
+   f['geometry']['coordinates']+=extension
+   widths=[2*w for w in f['properties']['width_mm']]
+   widths[-1]=16 # The old tip is now an interior point.
+   f['properties']['width_mm']=widths+[16,0]
  res={m:crasdi(copy.deepcopy(test),copy.deepcopy(gt),output_path=None,mode=m) for m in ['default','geom','att']}
  cases.append({'id':key,'label':label,'description':desc,'gt':gt,'test':test,'results':res})
  for name,vector in [('reference',gt),('testing',test)]:
   (ROOT/f'public/crasdi/{key}-{name}.geojson').write_text(json.dumps(vector))
   img=Image.new('L',(256,256));draw=ImageDraw.Draw(img)
-  for f in vector['features']:draw.line([(p[1],p[0]) for p in f['geometry']['coordinates']],fill=255,width=3)
+  for f in vector['features']:
+   points=[(p[1],p[0]) for p in f['geometry']['coordinates']]
+   if key=='growth':
+    # Illustration only: rasterize segment-average widths at 4 mm/pixel.
+    widths=f['properties']['width_mm']
+    for j in range(1,len(points)):
+     draw.line([points[j-1],points[j]],fill=255,width=max(1,round((widths[j-1]+widths[j])/8)))
+   else:draw.line(points,fill=255,width=3)
   img.save(ROOT/f'public/crasdi/{key}-{name}.png')
 (ROOT/'data/examples.json').write_text(json.dumps({'source_commit':'9aba96fa250bb98887d1e6cca463d645aa744715','cases':cases}))
 print([(c['id'],c['results']['default']['CRASDI']) for c in cases])
