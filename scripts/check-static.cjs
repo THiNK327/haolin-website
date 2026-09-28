@@ -46,6 +46,16 @@ const server=http.createServer((req,res)=>{
  if(bounds.tabs.length!==6||Math.max(...bounds.tabs.map(t=>t.width))-Math.min(...bounds.tabs.map(t=>t.width))>1||Math.abs(bounds.tabs[0].left-bounds.left)>1||Math.abs(bounds.tabs[5].right-bounds.right)>1)throw Error('Profile tabs do not fill the row evenly: '+JSON.stringify(bounds));
  await page.setViewportSize({width:390,height:844});
  if(await page.getByRole('tabpanel').count()!==1)throw Error('Only the selected profile section should be visible');
+
+ for(const width of [320,390,768,1024,1440]){
+  await page.setViewportSize({width,height:1000});
+  const fits=await page.getByRole('tablist',{name:'About Haolin'}).evaluate(list=>{
+   const row=list.getBoundingClientRect();
+   return list.scrollWidth<=list.clientWidth+1&&[...list.querySelectorAll('[role=tab]')].every(tab=>{const r=tab.getBoundingClientRect();return r.left>=row.left-1&&r.right<=row.right+1&&r.top>=row.top&&r.bottom<=row.bottom+1});
+  });
+  if(!fits)throw Error('Profile tabs overflow at browser width '+width);
+ }
+ await page.setViewportSize({width:390,height:844});
  await page.getByRole('tab',{name:'Current research',exact:true}).click();
  await page.getByRole('heading',{name:'Pavement crack digital twin',exact:true}).waitFor();
  if(await page.locator('#skills').isVisible())throw Error('Inactive skills section is visible');
