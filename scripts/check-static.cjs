@@ -38,6 +38,13 @@ const server=http.createServer((req,res)=>{
  if(await page.getByText(/Try your maps|Server Python|Email verification for custom runs/).count())throw Error('Old flow visible');
  await page.goto('http://localhost:4173/');await page.getByRole('heading',{name:/Haolin/}).first().waitFor();
  await page.getByRole('tab',{name:'Skills',exact:true}).waitFor();
+ await page.setViewportSize({width:1360,height:1000});
+ const bounds=await page.getByRole('tab',{name:'Skills',exact:true}).locator('..').evaluate(list=>{
+  const row=list.getBoundingClientRect();
+  return {left:row.left,right:row.right,tabs:[...list.querySelectorAll('[role=tab]')].map(t=>{const r=t.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}})};
+ });
+ if(bounds.tabs.length!==6||Math.max(...bounds.tabs.map(t=>t.width))-Math.min(...bounds.tabs.map(t=>t.width))>1||Math.abs(bounds.tabs[0].left-bounds.left)>1||Math.abs(bounds.tabs[5].right-bounds.right)>1)throw Error('Profile tabs do not fill the row evenly: '+JSON.stringify(bounds));
+ await page.setViewportSize({width:390,height:844});
  if(await page.getByRole('tabpanel').count()!==1)throw Error('Only the selected profile section should be visible');
  await page.getByRole('tab',{name:'Current research',exact:true}).click();
  await page.getByRole('heading',{name:'Pavement crack digital twin',exact:true}).waitFor();
