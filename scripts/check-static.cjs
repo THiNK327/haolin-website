@@ -37,6 +37,17 @@ const server=http.createServer((req,res)=>{
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Horizontal overflow');
  if(await page.getByText(/Try your maps|Server Python|Email verification for custom runs/).count())throw Error('Old flow visible');
  await page.goto('http://localhost:4173/');await page.getByRole('heading',{name:/Haolin/}).first().waitFor();
+ await page.getByRole('tab',{name:'Skills',exact:true}).waitFor();
+ if(await page.getByRole('tabpanel').count()!==1)throw Error('Only the selected profile section should be visible');
+ await page.getByRole('tab',{name:'Current research',exact:true}).click();
+ await page.getByRole('heading',{name:'Pavement crack digital twin',exact:true}).waitFor();
+ if(await page.locator('#skills').isVisible())throw Error('Inactive skills section is visible');
+ await page.getByRole('tab',{name:'Current research',exact:true}).press('ArrowRight');
+ await page.getByRole('heading',{name:'Education & experience',exact:true}).waitFor();
+ await page.goto('http://localhost:4173/#contact');
+ await page.getByRole('heading',{name:'Let’s connect',exact:true}).waitFor();
+ if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Profile tabs cause horizontal overflow');
+
  const response=await page.request.get('http://localhost:4173/api/playground/session');if(response.status()!==404)throw Error('API route still active');
  if(errors.length||api.length)throw Error(JSON.stringify({errors,api}));
  console.log('PASS: static pages, controls, matching changes, export, mobile layout, no API requests, removed API returns 404.');
