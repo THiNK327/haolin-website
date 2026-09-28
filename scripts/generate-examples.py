@@ -11,6 +11,9 @@ def vm(ls):
  return {'type':'FeatureCollection','properties':{'image':{'height_px':256,'width_px':256}},'features':[{'type':'Feature','geometry':{'type':'LineString','coordinates':line},'properties':{'name':f'branch-{i}','width_mm':[0]+[8+((j%3)*2) for j in range(len(line)-2)]+[0]}} for i,line in enumerate(ls)]}
 gt=vm(lines)
 cases=[]
+configurations={}
+pixel_sizes=[2,4,8]
+matching_radii=[1,3,5,10]
 for key,label,desc in [('missing','Missing branch','One branch is absent from the testing map. Unmatched crack length contributes to the difference score.'),('identical','Identical maps','The same vector map is used twice: all four attributes agree.'),('shift','Small displacement','All testing segments are shifted three pixels to the right, while the reference stays fixed.'),('extra','Extra branch','An additional, disconnected segment appears in the testing map. It is counted as unmatched length.'),('growth','Wider & longer','Existing cracks widen and extend at their tips. The original paths stay in place; no disconnected crack is added. Widths are doubled along existing nonzero-width points. This is a synthetic growth example, not a deterioration forecast.')]:
  test=copy.deepcopy(gt)
  if key=='missing':test['features'].pop(2)
@@ -26,6 +29,7 @@ for key,label,desc in [('missing','Missing branch','One branch is absent from th
    widths[-1]=16 # The old tip is now an interior point.
    f['properties']['width_mm']=widths+[16,0]
  res={m:crasdi(copy.deepcopy(test),copy.deepcopy(gt),output_path=None,mode=m) for m in ['default','geom','att']}
+ configurations[key]={f'{pixel}-{radius}':{m:(res[m] if pixel==4 and radius==5 else crasdi(copy.deepcopy(test),copy.deepcopy(gt),output_path=None,mode=m,pixel_size=pixel,epsilon=radius)) for m in ['default','geom','att']} for pixel in pixel_sizes for radius in matching_radii}
  cases.append({'id':key,'label':label,'description':desc,'gt':gt,'test':test,'results':res})
  for name,vector in [('reference',gt),('testing',test)]:
   (ROOT/f'public/crasdi/{key}-{name}.geojson').write_text(json.dumps(vector))
@@ -41,3 +45,10 @@ for key,label,desc in [('missing','Missing branch','One branch is absent from th
   img.save(ROOT/f'public/crasdi/{key}-{name}.png')
 (ROOT/'data/examples.json').write_text(json.dumps({'source_commit':'9aba96fa250bb98887d1e6cca463d645aa744715','cases':cases}))
 print([(c['id'],c['results']['default']['CRASDI']) for c in cases])
+
+# Store matching evidence once per configuration; modes only change weighting.
+for variants in configurations.values():
+ for key,modes in list(variants.items()):
+  assert all(all(value==modes['default'][field] for field,value in result.items() if field not in ('CRASDI','CRASDI_mode')) for result in modes.values())
+  variants[key]={'evidence':modes['default'],'totals':{mode:result['CRASDI'] for mode,result in modes.items()}}
+(ROOT/'data/example-configurations.json').write_text(json.dumps({'pixel_sizes':pixel_sizes,'matching_radii':matching_radii,'results':configurations},separators=(',',':')))

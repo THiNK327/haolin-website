@@ -1,13 +1,5 @@
 name: Publish playground API
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'server/**'
-      - 'public/crasdi/**'
-      - 'data/examples.json'
-      - '.dockerignore'
-      - '.github/workflows/publish-api.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,0 +1,44 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const fs=require('fs'),path=require('path'),http=require('http');
+const root=path.resolve('dist/client');
+const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.rsc':'text/x-component'};
+const server=http.createServer((req,res)=>{
+ let file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
+ if(!file.startsWith(root+path.sep)&&file!==root){res.writeHead(403);return res.end();}
+ if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
+ if(!fs.existsSync(file)&&fs.existsSync(file+'.html'))file+='.html';
+ if(!fs.existsSync(file)){res.writeHead(404);return res.end('Not found');}
+ res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);
+});
+(async()=>{
+ await new Promise(r=>server.listen(4173,'127.0.0.1',r));
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const page=await browser.newPage({viewport:{width:1360,height:1000}});
+ const errors=[],api=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/api/'))api.push(r.url())});
+ await page.goto('http://localhost:4173/playground');
+ await page.getByRole('button',{name:/Small displacement/}).click();
+ await page.locator('.comparison-total').filter({hasText:'0.250'}).waitFor();
+ await page.getByRole('combobox',{name:'Matching radius (pixels)'}).click();
+ await page.getByRole('option',{name:'1 px',exact:true}).click();
+ await page.locator('.comparison-total').filter({hasText:'1.000'}).waitFor();
+ await page.getByRole('button',{name:'Reset settings'}).click();
+ await page.locator('.comparison-total').filter({hasText:'0.250'}).waitFor();
+ await page.getByRole('button',{name:/Wider & longer/}).click();
+ await page.locator('.comparison-total').filter({hasText:'0.210'}).waitFor();
+ await page.getByRole('combobox',{name:'Compare using'}).click();
+ await page.getByRole('option',{name:'Geometry only',exact:true}).click();
+ await page.locator('.comparison-total').filter({hasText:'0.226'}).waitFor();
+ await page.getByRole('combobox',{name:'Resolution (mm / pixel)'}).click();
+ await page.getByRole('option',{name:'8 mm / pixel',exact:true}).click();
+ const dl=page.waitForEvent('download');await page.getByRole('button',{name:'Export result',exact:true}).click();const downloaded=await dl;
+ const fs=require('fs');const exported=JSON.parse(fs.readFileSync(await downloaded.path(),'utf8'));if(exported.parameters.pixel_size!==8||exported.parameters.mode!=='geom')throw Error('Bad export');
+ await page.screenshot({path:'/tmp/haolin-static-desktop.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/haolin-static-mobile.png',fullPage:true});
+ if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Horizontal overflow');
+ if(await page.getByText(/Try your maps|Server Python|Email verification for custom runs/).count())throw Error('Old flow visible');
+ await page.goto('http://localhost:4173/');await page.getByRole('heading',{name:/Haolin/}).first().waitFor();
+ const response=await page.request.get('http://localhost:4173/api/playground/session');if(response.status()!==404)throw Error('API route still active');
+ if(errors.length||api.length)throw Error(JSON.stringify({errors,api}));
+ console.log('PASS: static pages, controls, matching changes, export, mobile layout, no API requests, removed API returns 404.');
+ await browser.close();server.close();
+})().catch(e=>{console.error(e);process.exit(1)});

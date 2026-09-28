@@ -8,12 +8,12 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
-    "start": "wrangler dev --config dist/server/wrangler.json",
+    "start": "wrangler dev --config cloudflare-static.jsonc",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "deploy": "wrangler deploy --config dist/server/wrangler.json",
+    "deploy": "wrangler deploy --config cloudflare-static.jsonc",
     "check": "tsc --noEmit",
-    "deploy:check": "wrangler deploy --dry-run --config dist/server/wrangler.json"
+    "deploy:check": "wrangler deploy --dry-run --config cloudflare-static.jsonc"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
