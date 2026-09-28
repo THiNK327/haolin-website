@@ -5,6 +5,8 @@ from email.message import EmailMessage
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
+import httpx
+from server.state_store import blob_connect, StateStoreError
 
 DB = os.getenv('DATABASE_PATH', '/data/playground.sqlite3')
 API_KEY = os.getenv('CRASDI_API_KEY', '')
@@ -19,6 +21,10 @@ active_accounts = set()
 
 @contextmanager
 def connect():
+    if os.getenv('STATE_BACKEND', 'sqlite') == 'azure_blob':
+        with blob_connect() as db:
+            yield db
+        return
     db = sqlite3.connect(DB, timeout=5)
     db.row_factory = sqlite3.Row
     try:
@@ -32,7 +38,15 @@ def connect():
 async def lifespan(app):
     if len(API_KEY) < 32 or len(SECRET) < 32 or API_KEY == SECRET:
         raise RuntimeError('Set distinct CRASDI_API_KEY and AUTH_SECRET values of at least 32 characters.')
-    Path(DB).parent.mkdir(parents=True, exist_ok=True)
+    backend = os.getenv('STATE_BACKEND', 'sqlite')
+    if backend not in ('sqlite', 'azure_blob'):
+        raise RuntimeError('Unknown STATE_BACKEND.')
+    if os.getenv('CONTAINER_APP_NAME') and backend != 'azure_blob':
+        raise RuntimeError('Azure Container Apps requires durable azure_blob state.')
+    if os.getenv('EMAIL_PROVIDER', 'gmail') not in ('gmail', 'resend'):
+        raise RuntimeError('Unknown EMAIL_PROVIDER.')
+    if backend == 'sqlite':
+        Path(DB).parent.mkdir(parents=True, exist_ok=True)
     with connect() as db:
         db.executescript('''
         CREATE TABLE IF NOT EXISTS codes (account TEXT PRIMARY KEY, digest TEXT, expires INTEGER, attempts INTEGER);
@@ -50,16 +64,20 @@ def digest(text):
 
 
 def mail_ready():
+    if os.getenv('EMAIL_PROVIDER', 'gmail') == 'resend':
+        return bool(os.getenv('RESEND_API_KEY') and os.getenv('EMAIL_FROM'))
     return bool(os.getenv('SMTP_USER') and os.getenv('SMTP_PASSWORD'))
 
 
 @app.middleware('http')
 async def protect(request, call_next):
-    if not hmac.compare_digest(request.headers.get('x-api-key', ''), API_KEY):
+    if request.method == 'GET' and request.url.path == '/healthz':
+        return JSONResponse({'ok': True}, headers={'Cache-Control': 'no-store'})
+    if not API_KEY or not hmac.compare_digest(request.headers.get('x-api-key', ''), API_KEY):
         return JSONResponse({'detail': 'Unauthorized.'}, status_code=401)
     try:
         response = await call_next(request)
-    except sqlite3.Error:
+    except (sqlite3.Error, StateStoreError):
         response = JSONResponse({'detail': 'Service temporarily unavailable. Please try later.'}, status_code=503)
     response.headers['Cache-Control'] = 'no-store'
     return response
@@ -136,6 +154,19 @@ async def get_session(request: Request):
 
 
 def send_code(email, code):
+    text = f'Your verification code is {code}.\n\nIt expires in 10 minutes and can be used once. If you did not request it, you can ignore this email.\n\nHaolin’s Research Playground'
+    if os.getenv('EMAIL_PROVIDER', 'gmail') == 'resend':
+        response = httpx.post('https://api.resend.com/emails', headers={
+            'Authorization': 'Bearer ' + os.environ['RESEND_API_KEY'],
+        }, json={
+            'from': os.environ['EMAIL_FROM'], 'to': [email],
+            'reply_to': os.getenv('REPLY_TO', 'hwang972@gatech.edu'),
+            'subject': 'Your playground verification code', 'text': text,
+        }, timeout=15, follow_redirects=False)
+        response.raise_for_status()
+        if not response.json().get('id'):
+            raise RuntimeError('Email provider did not confirm acceptance.')
+        return
     message = EmailMessage()
     message['From'] = "Haolin's Research Playground <" + os.environ['SMTP_USER'] + '>'
     message['To'] = email

@@ -2,6 +2,10 @@
 
 The website now uses this Python API for custom comparisons. Examples are precomputed and stay accessible without sign-in. Until `CRASDI_API_URL` and `CRASDI_API_KEY` are configured on the website, it displays an honest unavailable state; there is no fake verification or browser-compute fallback.
 
+## Azure Container Apps
+
+See [the Azure setup guide](AZURE.md) for the container image, private Blob-backed authentication state, Resend email, secret references, and scale-to-zero configuration.
+
 ## Deploy on your own server
 
 Use a Linux server with Docker Compose and at least 2 GB RAM available for this service (allow additional RAM for the OS). No automatic scaling is needed. The website remains a separate Cloudflare-compatible Worker build; it is not a plain static Pages upload.

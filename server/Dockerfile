@@ -1,5 +1,6 @@
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MPLCONFIGDIR=/tmp/matplotlib
+LABEL org.opencontainers.image.source="https://github.com/THiNK327/haolin-website"
 WORKDIR /app
 COPY server/requirements.txt /app/server/requirements.txt
 RUN pip install --no-cache-dir -r server/requirements.txt && useradd --uid 10001 --create-home runner && mkdir /data && chown runner:runner /data
