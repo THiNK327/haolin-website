@@ -6,6 +6,7 @@ import { createPlaygroundClient } from '@/lib/playground/client';
 import { playgroundConfig } from '@/lib/playground/config';
 import type { AccessDecision, ToolMode } from '@/lib/playground/types';
 import { EntryGate } from './entry-gate';
+import { ModeBoundary } from './mode-boundary';
 import { exampleModules, interactiveModules, verificationProviders } from './modules';
 
 const client = createPlaygroundClient(playgroundConfig);
@@ -64,12 +65,12 @@ export function ToolPage({ toolId }: { toolId: string }) {
         return <button type="button" key={item} id={`${id}-${item}-tab`} role="tab" aria-selected={mode === item} aria-controls={`${id}-${item}-panel`} tabIndex={mode === item ? 0 : -1} onClick={() => choose(item)} onKeyDown={event => keyboard(event, item)}><span>{labels[item]}</span>{status === 'planned' && <small>Planned</small>}</button>;
       })}</div>
       {modes.map(item => <section key={item} id={`${id}-${item}-panel`} className="tool-panel" role="tabpanel" aria-labelledby={`${id}-${item}-tab`} tabIndex={0} hidden={mode !== item}>
-        {item === 'example' ? (tool.modes.example === 'available' && Example
+        <ModeBoundary>{item === 'example' ? (tool.modes.example === 'available' && Example
           ? visited.example && <Suspense fallback={<p role="status">Loading examples…</p>}><Example/></Suspense>
           : <div className="tool-notice"><h2>Examples are being prepared</h2><p>This tool is planned. Curated examples will be added here when they are ready.</p></div>)
           : tool.modes.interactive.status === 'available' && Workspace
             ? visited.interactive && <EntryGate key={tool.id} toolId={tool.id} checkAccess={checkAccess} verificationProviders={verificationProviders}><Suspense fallback={<p role="status">Opening workspace…</p>}><Workspace toolId={tool.id} run={run}/></Suspense></EntryGate>
-            : <div className="tool-notice"><h2>Custom analysis is not available yet</h2><p>{tool.modes.example === 'available' ? 'Explore the examples now, without preparing or uploading any data. They will remain available when custom analysis is added.' : 'This interactive tool will be added when it is ready. There is nothing to upload or verify at this stage.'}</p>{tool.modes.example === 'available' && <button type="button" className="button secondary" onClick={() => choose('example')}>Explore examples instead</button>}</div>}
+            : <div className="tool-notice"><h2>Custom analysis is not available yet</h2><p>{tool.modes.example === 'available' ? 'Explore the examples now, without preparing or uploading any data. They will remain available when custom analysis is added.' : 'This interactive tool will be added when it is ready. There is nothing to upload or verify at this stage.'}</p>{tool.modes.example === 'available' && <button type="button" className="button secondary" onClick={() => choose('example')}>Explore examples instead</button>}</div>}</ModeBoundary>
       </section>)}
     </> : <div className="tool-notice"><h2>This tool is being prepared</h2><p>Examples and interactive options will appear here when they are ready.</p></div>}
   </main><SiteFooter/></div></>;

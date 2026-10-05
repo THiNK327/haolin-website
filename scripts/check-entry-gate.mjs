@@ -15,6 +15,8 @@ export async function checkEntryGate(browser) {
       import React, {useCallback, useRef, useState} from 'react';
       import {createRoot} from 'react-dom/client';
       import {EntryGate} from '../components/playground/entry-gate';
+      import {ModeBoundary} from '../components/playground/mode-boundary';
+      function BrokenModule(){throw Error('Intentional module isolation test')}
       function App(){
         const [scenario,setScenario]=useState('verify');
         const verified=useRef(false);
@@ -27,10 +29,11 @@ export async function checkEntryGate(browser) {
           return scenario==='open'||scenario==='slow'||verified.current ? {status:'allowed'} : {status:'verification-required',method:'test'};
         },[scenario]);
         const providers={test:({onComplete})=><button onClick={()=>{verified.current=true;onComplete()}}>Confirm test verification</button>};
-        return <><nav>{['verify','open','deny','missing','error','slow'].map(name=><button key={name} onClick={()=>{verified.current=false;setScenario(name)}}>{name}</button>)}</nav>
-          <EntryGate toolId="test-tool" checkAccess={check} verificationProviders={providers}>
+        return <><nav>{['verify','open','deny','missing','error','slow','broken'].map(name=><button key={name} onClick={()=>{verified.current=false;setScenario(name)}}>{name}</button>)}</nav>
+          <section aria-label="independent example"><p>Example mode remains available</p></section>
+          <ModeBoundary>{scenario==='broken'?<BrokenModule/>:<EntryGate toolId="test-tool" checkAccess={check} verificationProviders={providers}>
             <label>Test upload<input type="file"/></label>
-          </EntryGate></>;
+          </EntryGate>}</ModeBoundary></>;
       }
       createRoot(document.getElementById('root')).render(<App/>);
     `);
@@ -68,8 +71,15 @@ export async function checkEntryGate(browser) {
     await page.getByText('Test quota exhausted', { exact: true }).waitFor();
     await page.waitForTimeout(350);
     assert.equal(await page.locator('input[type=file]').count(), 0, 'A stale response must not unlock a denied workspace');
+    await page.getByRole('button', { name: 'broken', exact: true }).click();
+    await page.getByRole('heading', { name: 'This mode could not be loaded', exact: true }).waitFor();
+    await page.getByText('Example mode remains available', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('button', { name: 'open', exact: true }).count(), 1, 'A module failure must not remove navigation');
+    await page.getByRole('button', { name: 'open', exact: true }).click();
+    await page.getByRole('button', { name: 'Retry this mode', exact: true }).click();
+    await page.getByLabel('Test upload').waitFor();
     assert.deepEqual(errors, []);
-    console.log('PASS: verification precedes upload; open, verified, denied, missing-provider, error, and stale-response entry states.');
+    console.log('PASS: verification precedes upload; open, verified, denied, missing-provider, error, stale-response entry states; isolated module errors.');
   } finally {
     await page?.close();
     await server?.close();
