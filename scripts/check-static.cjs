@@ -4,20 +4,27 @@ const fs=require('fs'),path=require('path'),http=require('http');
 const root=path.resolve('dist/client');
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.rsc':'text/x-component'};
 const server=http.createServer((req,res)=>{
- let file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
- if(!file.startsWith(root+path.sep)&&file!==root){res.writeHead(403);return res.end();}
- if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
- if(!fs.existsSync(file)&&fs.existsSync(file+'.html'))file+='.html';
- if(!fs.existsSync(file)){res.writeHead(404);return res.end('Not found');}
+ let requested;
+ try{requested=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));}
+ catch{res.writeHead(400);return res.end('Bad request');}
+ if(!requested.startsWith(root+path.sep)&&requested!==root){res.writeHead(403);return res.end();}
+ // A parent route may be playground.html while playground/ contains its tool pages.
+ // Do not replace the requested path with a nonexistent directory index first.
+ const candidates=[requested,requested+'.html',path.join(requested,'index.html')];
+ const file=candidates.find(candidate=>fs.existsSync(candidate)&&fs.statSync(candidate).isFile());
+ if(!file){res.writeHead(404);return res.end('Not found');}
  res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);
 });
 (async()=>{
  await new Promise(r=>server.listen(4173,'127.0.0.1',r));
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ let page;
+ const errors=[],api=[];
  try{
- const page=await browser.newPage({viewport:{width:1360,height:1000}});
- const errors=[],api=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/api/'))api.push(r.url())});
- await page.goto('http://localhost:4173/playground');
+ page=await browser.newPage({viewport:{width:1360,height:1000}});
+ page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/api/'))api.push(r.url())});
+ const catalogResponse=await page.goto('http://localhost:4173/playground');
+ assert.equal(catalogResponse.status(),200,'The catalog static HTML must resolve even when its tool directory exists');
  await page.getByRole('heading',{name:'Explore the ideas. Try the tools.',exact:true}).waitFor();
  assert.equal(await page.locator('.tool-card').count(),3);
  assert.equal(await page.locator('input[type=file]').count(),0);
@@ -105,5 +112,12 @@ const server=http.createServer((req,res)=>{
  if(errors.length||api.length)throw Error(JSON.stringify({errors,api}));
  console.log('PASS: catalog, tool routes, preserved scores/export, mode state, keyboard navigation, responsive layouts, profile regressions, and zero API requests.');
  await (await import('./check-entry-gate.mjs')).checkEntryGate(browser);
+ }catch(error){
+  if(page&&!page.isClosed()){
+   console.error('Browser diagnostics:',JSON.stringify({url:page.url(),errors,api,body:(await page.locator('body').innerText()).slice(0,16000)}));
+   await page.screenshot({path:'/tmp/haolin-static-failure.png',fullPage:true}).catch(()=>{});
+  }
+  console.error('Exported HTML:',fs.readdirSync(root,{recursive:true}).filter(file=>file.endsWith('.html')));
+  throw error;
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
 })().catch(e=>{console.error(e);process.exit(1)});
