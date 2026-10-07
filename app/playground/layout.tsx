@@ -1,3 +1,7 @@
-import type {Metadata} from 'next';
-export const metadata:Metadata={title:'CRASDI Playground — Haolin Wang',description:'Explore pavement crack map examples and adjust CRASDI comparison settings, directly in your browser.'};
-export default function PlaygroundLayout({children}:{children:React.ReactNode}){return children}
+import type { Metadata } from 'next';
+import '@/components/playground/playground.css';
+export const metadata: Metadata = {
+  title: 'Research Playground — Haolin Wang',
+  description: 'Explore research ideas with curated examples and discover interactive tools as they become available.',
+};
+export default function PlaygroundLayout({ children }: { children: React.ReactNode }) { return children; }

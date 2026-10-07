@@ -17,10 +17,17 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - run: node --experimental-strip-types scripts/check-playground.mjs
       - run: pnpm build
       - run: pnpm deploy:check
-      - name: Check static page interactions without a backend
+      - name: Check static pages and optional entry gate
         run: |
           npm install --prefix "$RUNNER_TEMP/browser" playwright@1.51.1
           node "$RUNNER_TEMP/browser/node_modules/playwright/cli.js" install --with-deps chromium
           PLAYWRIGHT_MODULE="$RUNNER_TEMP/browser/node_modules/playwright" node scripts/check-static.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playground-browser-checks
+          path: /tmp/haolin-static-*.png
+          if-no-files-found: ignore
