@@ -39,7 +39,6 @@ export default function Home() {
       </div>
       <div className="profile-side">
         <aside className="portrait-card"><img className="headshot" src="/haolin-wang.png" width="486" height="470" alt="Haolin Wang"/><div className="portrait-caption"><strong>Haolin Wang</strong><span>Ph.D. Student · Georgia Tech</span><span>Atlanta, Georgia</span></div></aside>
-        <ResearchPlaygroundLink toolId="crasdi" preview/>
       </div>
     </section>
     <ProfileSections>
