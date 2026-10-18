@@ -27,7 +27,9 @@ const server=http.createServer((req,res)=>{
   const primary=hero.getByRole('link',{name:'Try CRASDI examples',exact:true});
   assert.equal(await primary.getAttribute('href'),'/playground/crasdi#example');
   assert.match(await primary.getAttribute('class'),/button/);
-  assert.equal(await page.locator('.profile-side .research-tool-preview img').count(),2);
+  assert.equal(await page.locator('.profile-side .research-tool-cta').count(),0,'The rejected sidebar preview card must stay removed');
+  assert.equal(await page.locator('.profile-side .research-tool-preview').count(),0);
+  assert.equal(await page.locator('.profile-side img').count(),1,'Keep only the portrait in the sidebar');
   assert.equal(await page.locator('.profile-side img').evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0)),true);
   const cv=hero.getByRole('link',{name:'Download my CV',exact:true});
   assert.equal(await cv.getAttribute('href'),'/Haolin_Wang_Academic_CV_v6.pdf');
@@ -79,7 +81,7 @@ const server=http.createServer((req,res)=>{
   await page.getByRole('tab',{name:'Research',exact:true}).click();
   assert.doesNotMatch(await page.locator('#research').innerText(),/11,468|ten solvers/);
   assert.deepEqual(errors,[]);assert.deepEqual(api,[]);
-  console.log('PASS: CV v6 PDF/alias, prominent preview/actions, research-to-tool round trips, planned statuses, source updates, 320–1440px layouts, and zero API calls.');
+  console.log('PASS: CV v6 PDF/alias, no sidebar preview card, retained actions, research-to-tool round trips, planned statuses, source updates, 320–1440px layouts, and zero API calls.');
  }catch(error){
   console.error(JSON.stringify({url:page.url(),errors,api,body:(await page.locator('body').innerText()).slice(0,18000)}));
   await page.screenshot({path:'/tmp/haolin-static-cv-v6-failure.png',fullPage:true}).catch(()=>{});
