@@ -1,6 +1,7 @@
 'use client';
 import { Suspense, useCallback, useEffect, useId, useState, type KeyboardEvent } from 'react';
 import { SiteHeader, SiteFooter } from '@/components/site-shell';
+import { ToolResearchContext } from '@/components/research-playground';
 import { getPlaygroundTool, visibleModes } from '@/data/playground';
 import { createPlaygroundClient } from '@/lib/playground/client';
 import { playgroundConfig } from '@/lib/playground/config';
@@ -47,8 +48,7 @@ export function ToolPage({ toolId }: { toolId: string }) {
     document.getElementById(`${id}-${modes[index]}-tab`)?.focus();
   };
   const checkAccess = useCallback((signal: AbortSignal): Promise<AccessDecision> => {
-    // Browser-only tools can be public. Server tools always ask the backend, even
-    // when its launch policy is open: frontend flags never authorize server work.
+    // Server tools always ask the backend, including when its policy is open.
     return tool.modes.interactive.runtime === 'browser'
       ? Promise.resolve({ status: 'allowed' })
       : client.checkAccess(tool.id, signal);
@@ -59,6 +59,7 @@ export function ToolPage({ toolId }: { toolId: string }) {
   return <><a className="skip" href="#tool">Skip to tool</a><div className="wrap playground-page"><SiteHeader playground/><main id="tool">
     <div className="tool-breadcrumb"><a className="text-link" href="/playground">← All playground tools</a></div>
     <header className="tool-heading"><div className="eyebrow">{tool.category}</div><h1>{tool.title}</h1><p>{tool.description}</p>{tool.sourceUrl && <a className="text-link" href={tool.sourceUrl} target="_blank" rel="noreferrer">Code & documentation ↗</a>}</header>
+    <ToolResearchContext toolId={tool.id}/>
     {modes.length > 0 ? <>
       <div className="tool-modes" role="tablist" aria-label={`${tool.title} modes`}>{modes.map(item => {
         const status = item === 'example' ? tool.modes.example : tool.modes.interactive.status;

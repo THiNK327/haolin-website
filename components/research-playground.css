@@ -1,0 +1,37 @@
+/* Small, warm invitations; preserve the existing reading-first profile and tool UI. */
+.profile-side{min-width:0;display:grid;gap:22px;align-content:start}
+.profile-side .portrait-card{margin:0}
+.profile-side .research-tool-cta{margin:0}
+.profile-side .research-tool-kicker{flex-direction:column;align-items:flex-start;gap:7px}
+.profile-copy .hero-links{gap:13px 20px}
+.profile-copy .profile-role{font-size:15px;line-height:1.7}
+.profile-copy .dissertation-note{font-size:14px;line-height:1.75}
+.hero-example-note{font-size:12px!important;color:var(--muted-foreground);margin:12px 0 0!important}
+.research-tool-cta{margin:23px 0 3px;padding:21px 23px;border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:6px;background:var(--card);min-width:0}
+.research-tool-cta.is-planned{border-left-color:var(--border);background:transparent}
+.research-tool-kicker{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--primary)}
+.research-tool-kicker>span:first-child{display:inline-flex;gap:6px;align-items:center;font-weight:600;letter-spacing:.3px}
+.research-tool-status{border:1px solid var(--border);border-radius:4px;padding:3px 7px;background:var(--accent);white-space:normal}
+.is-planned .research-tool-status{background:var(--secondary);color:var(--muted-foreground)}
+.research-tool-cta .research-tool-title{font-size:20px;line-height:1.35;letter-spacing:-.35px;font-weight:600;color:var(--foreground);margin:13px 0 9px}
+.research-tool-cta .research-tool-description{font-size:14px;line-height:1.75;color:var(--muted-foreground);margin:0 0 17px}
+.research-tool-cta .button{white-space:normal;text-align:center}
+.research-tool-note{display:block;font-size:11px;color:var(--muted-foreground);line-height:1.6;margin-top:10px}
+.research-tool-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px;border-radius:4px}
+.research-tool-preview figure{margin:0;min-width:0}
+.research-tool-preview img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain;max-height:160px;border:1px solid var(--border);border-radius:4px;background:var(--secondary)}
+.research-tool-preview figcaption{text-align:center;font-size:10px;line-height:1.5;color:var(--muted-foreground);margin-top:5px}
+.research-tool-preview:hover img{border-color:var(--primary)}
+.tool-research-context{display:flex;gap:22px;align-items:center;justify-content:space-between;margin:0 0 26px;padding:19px 22px;border:1px solid var(--border);border-radius:6px;background:var(--card)}
+.tool-research-context p{font-size:13px;line-height:1.75;color:var(--muted-foreground);margin:8px 0 0;max-width:760px}
+.tool-research-context .text-link{font-size:13px;flex-shrink:0;max-width:240px}
+.research-pipeline-intro{font-size:16px;line-height:1.8;color:var(--muted-foreground);margin:0 0 28px}
+.profile-sections article[id^=research-]{scroll-margin-top:30px}
+.navlinks .playground-nav{border:1px solid var(--border);border-radius:5px;padding:7px 12px;background:var(--card);color:var(--primary)}
+.navlinks .playground-nav:hover{border-color:var(--primary);background:var(--accent)}
+.navlinks{align-items:center}
+.resource-action{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:17px 0 0}
+.resource-action small{color:var(--muted-foreground);font-size:12px}
+.reference-list li{overflow-wrap:anywhere}
+@media(max-width:900px){.tool-research-context{align-items:flex-start;flex-direction:column;gap:12px}.profile-side .research-tool-cta{padding:18px}}
+@media(max-width:680px){.profile-side{gap:20px}.profile-side .portrait-card{max-width:380px;justify-self:center;width:100%}.research-tool-cta{padding:18px}.research-tool-preview img{max-height:130px}.navlinks .playground-nav{padding:6px 8px;font-size:12px}.navlinks{gap:12px}.tool-research-context{padding:17px}.research-tool-cta .research-tool-title{font-size:19px}.profile-copy .hero-links .button{font-size:13px}}

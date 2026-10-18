@@ -1,0 +1,50 @@
+{
+  "source": "Haolin_Wang_Academic_CV_v6.docx",
+  "groups": [
+    {"title":"Peer-reviewed journal articles","entries":[
+      "Wang, H.†, Yang, Z.†, Geary, G. M., & Tsai, Y.-C. (2026). Standardizing cracking data quality assessment and quantification. Transportation Research Record. Accepted (Paper 25-01724); in press.",
+      "Yang, Z., Mohammadi, M., Wang, H., & Tsai, Y.-C. (2025). A feature-based pavement image registration method for precise pavement deterioration monitoring. Computer-Aided Civil and Infrastructure Engineering, 40(10), 1276–1294. (IF 9.1, Q1)"
+    ]},
+    {"title":"Peer-reviewed conference and workshop papers","entries":[
+      "Tsai, Y.-C., Wang, H., & Luo, S. (2026). Work in progress: A problem-solving systems approach to AI education: Lifecycle modules, inter-module reasoning, and values in practice. 2026 ASEE Annual Conference & Exposition, Charlotte, NC. doi:10.18260/1-2--59094",
+      "Wang, H., & Tsai, Y.-C. (2025). Toward reliable pavement digital twins: Multi-scale spatiotemporal monitoring challenges and solutions. Proceedings of the 1st ACM SIGSPATIAL International Workshop on Spatial Digital Twins. doi:10.1145/3764924.3770893"
+    ]},
+    {"title":"Manuscripts under review or in revision","entries":[
+      "Wang, H.*, Yang, Z.*, Bao, J., Tsai, Y.-C., Geary, G. M., Cary, C., & Frith, D. J. A link-level crack density indicator based on the Crack Vector Model. ASCE Journal of Computing in Civil Engineering. In revision (CPENG-8858).",
+      "Wang, H.*, Ryu, S.*, Yang, Z., & Tsai, Y.-C. CRAck Structural Difference Index (CRASDI): A crack-topology-aware index for crack map comparison. Computer-Aided Civil and Infrastructure Engineering. Under review.",
+      "Wang, H., Luo, S., Yang, Z., & Tsai, Y.-C. Presence-aware benchmarking of lane-marking detection methods for pavement distress measurement. Submitted to an ASCE journal, September 2026; companion presentation accepted for the TRB 106th Annual Meeting."
+    ]},
+    {"title":"Preprints","entries":[
+      "Zhang, X., Wang, H., Hsieh, Y. A., Yang, Z., Yezzi, A., & Tsai, Y.-C. (2025). Deep learning for crack detection: A review of learning paradigms, generalizability, and datasets. arXiv:2508.10256",
+      "Zhang, X., Wang, H., & Yang, Z. (2026). Towards successful implementation of automated raveling detection: Effects of training data size, illumination difference, and spatial shift. arXiv:2604.13322"
+    ]},
+    {"title":"In preparation · First author","entries":[
+      "Wang, H., Yang, Z., & Tsai, Y.-C. Uncertainty quantification for pavement surface crack measurement. Target journal: Reliability Engineering & System Safety (draft complete; submission planned early 2027).",
+      "Wang, H., et al. Crack-sealing path planning as a sliding-window arc-routing problem: Problem definition and a benchmark of classical, exact, and learned solvers. Target journal: Computer-Aided Civil and Infrastructure Engineering (2027).",
+      "Wang, H., et al. Feasibility of low-cost RGB imagery as a surrogate for 3D laser pavement surveys: Calibration and cost-effective frequent monitoring. Target journal: Transportation Research Part C: Emerging Technologies (2027).",
+      "Wang, H., & Tsai, Y.-C. Digital twins for pavement maintenance and rehabilitation: A systematic review of creation, synchronization, and application. Target journal: Automation in Construction (2027)."
+    ]},
+    {"title":"In preparation · Co-author","entries":[
+      "Fung, J., Wang, H., Lou, Z., Yang, Z., & Tsai, Y.-C. Unsupervised deep learning methodology for spatial-temporal pavement image registration. Target journal: Automation in Construction (2027)."
+    ]},
+    {"title":"Technical report","entries":[
+      "Tsai, Y.-C., et al. (2026). Validating standard definitions for comparable pavement cracking data. NCHRP Project 01-57B Final Report, with appendices on crack-protocol design, data quality assessment, proposed revisions to AASHTO R 85, and crack-data aggregation. Transportation Research Board. (Contributing author)"
+    ]}
+  ],
+  "presentations": [
+    "Wang, H., Luo, S., Yang, Z., & Tsai, Y.-C. (2027). Benchmarking lane marking detection methods for accurate pavement distress measurement. Transportation Research Board 106th Annual Meeting, Washington, DC, January 2027 (accepted for presentation).",
+    "Tsai, Y.-C., Wang, H., & Luo, S. (2026). A problem-solving systems approach to AI education. Poster, ASEE Annual Conference & Exposition, Charlotte, NC, June 2026.",
+    "Wang, H.‡, Yang, Z., Tsai, Y.-C., & Huft, D. (2026). A structurally defined crack density indicator based on a Crack Vector Model (CVM). Road Profile Users’ Group (RPUG) Annual Conference, Pittsburgh, PA, April 2026.",
+    "Wang, H.‡, Yang, Z., Tsai, Y.-C., & Moriarty, J. (2026). Evaluating cracking data quality using field-labeled crack map ground reference. RPUG Annual Conference, Pittsburgh, PA, April 2026.",
+    "Yang, Z., Wang, H., Tsai, Y.-C., & Miller, R. (2026). A three-level cracking definition framework for consistent and flexible pavement crack reporting. RPUG Annual Conference, Pittsburgh, PA, April 2026.",
+    "Wang, H.‡, Yang, Z., Geary, G. M., & Tsai, Y.-C. (2026). Standardizing cracking data quality assessment and quantification: Case studies in Florida, Mississippi, and Texas. Poster, Transportation Research Board 105th Annual Meeting, Washington, DC, January 2026.",
+    "Zhang, X., Wang, H.‡, & Yang, Z. (2026). Towards successful implementation of automated raveling detection: Effects of training data size, illumination difference, and spatial shift. Poster, Transportation Research Board 105th Annual Meeting, Washington, DC, January 2026.",
+    "Wang, H.‡, & Tsai, Y.-C. (2025). Toward reliable pavement digital twins: Multi-scale spatiotemporal monitoring challenges and solutions. 1st ACM SIGSPATIAL International Workshop on Spatial Digital Twins, November 2025.",
+    "Yang, Z., Wang, H.‡, Salameh, R., Mohammadi, M., & Tsai, Y.-C. (2025). Cracking data quality assessment using ground references: Developing a standard methodology. RPUG Annual Conference, April 2025.",
+    "Wang, H.‡, Yang, Z., Salameh, R., Mohammadi, M., & Tsai, Y.-C. (2025). Impact analysis of image offsets on time-series crack analysis variability using 3D pavement imaging data. Lectern session, Transportation Research Board 104th Annual Meeting, Washington, DC, January 2025.",
+    "Wang, H.‡, Yang, Z., Mohammadi, M., & Tsai, Y.-C. (2024). Deformable registration on pavement images for topological crack propagation analysis. Poster, Transportation Research Board 103rd Annual Meeting, Washington, DC, January 2024.",
+    "Yang, Z., Mohammadi, M., Wang, H., & Tsai, Y.-C. (2024). A feature-based pavement image registration method for precise pavement deterioration monitoring. Poster, Transportation Research Board 103rd Annual Meeting, Washington, DC, January 2024.",
+    "Tsai, Y.-C., Yang, Z., Wang, H., & Mohammadi, M. (2024). Multi-temporal pavement image registration for pavement distress deterioration analysis. TRB Pavement Analysis Workshop (PAWS), 103rd Annual Meeting, Washington, DC, January 2024.",
+    "Wang, H.‡, & Tsai, Y.-C. (2023). Machine learning with microtexture feature extraction for automated pavement raveling classification. ASCE Engineering Mechanics Institute Conference (EMI 2023), Atlanta, GA, June 2023."
+  ]
+}
