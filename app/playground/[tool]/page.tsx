@@ -9,7 +9,7 @@ export function generateStaticParams() {
 }
 export async function generateMetadata({ params }: { params: Promise<{ tool: string }> }): Promise<Metadata> {
   const tool = getPlaygroundTool((await params).tool);
-  return tool ? { title: `${tool.title} Playground — Haolin Wang`, description: tool.description } : {};
+  return tool ? { title: `${tool.title} Playground: Haolin Wang`, description: tool.description } : {};
 }
 export default async function PlaygroundToolPage({ params }: { params: Promise<{ tool: string }> }) {
   const tool = getPlaygroundTool((await params).tool);

@@ -86,7 +86,7 @@ const server=http.createServer((req,res)=>{
   const row=list.getBoundingClientRect();
   return {left:row.left,right:row.right,tabs:[...list.querySelectorAll('[role=tab]')].map(t=>{const r=t.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}})};
  });
- if(bounds.tabs.length!==6||Math.max(...bounds.tabs.map(t=>t.width))-Math.min(...bounds.tabs.map(t=>t.width))>1||Math.abs(bounds.tabs[0].left-bounds.left)>1||Math.abs(bounds.tabs[5].right-bounds.right)>1)throw Error('Profile tabs do not fill the row evenly: '+JSON.stringify(bounds));
+ if(bounds.tabs.length!==8||Math.max(...bounds.tabs.map(t=>t.width))-Math.min(...bounds.tabs.map(t=>t.width))>1||Math.abs(bounds.tabs[0].left-bounds.left)>1||Math.abs(bounds.tabs[7].right-bounds.right)>1)throw Error('Profile tabs do not fill the row evenly: '+JSON.stringify(bounds));
  await page.setViewportSize({width:390,height:844});
  if(await page.getByRole('tabpanel').count()!==1)throw Error('Only the selected profile section should be visible');
  for(const width of [320,390,768,1024,1440]){
@@ -98,11 +98,26 @@ const server=http.createServer((req,res)=>{
   if(!fits)throw Error('Profile tabs overflow at browser width '+width);
  }
  await page.setViewportSize({width:390,height:844});
- await page.getByRole('tab',{name:'Current research',exact:true}).click();
+ await page.getByRole('tab',{name:'Research',exact:true}).click();
  await page.getByRole('heading',{name:'Pavement crack digital twin',exact:true}).waitFor();
  if(await page.locator('#skills').isVisible())throw Error('Inactive skills section is visible');
- await page.getByRole('tab',{name:'Current research',exact:true}).press('ArrowRight');
- await page.getByRole('heading',{name:'Education & experience',exact:true}).waitFor();
+ await page.getByRole('tab',{name:'Research',exact:true}).press('ArrowRight');
+ await page.getByRole('heading',{name:'Papers & presentations',exact:true}).waitFor();
+ for(const [tab,id] of [['Publications','publications'],['Resources','resources'],['Background','background'],['Teaching','teaching'],['Service','service']]){
+  await page.getByRole('tab',{name:tab,exact:true}).click();
+  await page.locator('#'+id).waitFor({state:'visible'});
+  for(const width of [390,1360]){
+   await page.setViewportSize({width,height:1000});
+   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Profile content overflow: '+tab+' at '+width);
+  }
+ }
+ await page.getByRole('tab',{name:'Publications',exact:true}).click();
+ assert.equal(await page.locator('#publications article li').count(),15);
+ await page.getByText('Conference presentations (14)',{exact:true}).click();
+ assert.equal(await page.locator('#publications details li').count(),14);
+ await page.screenshot({path:'/tmp/haolin-static-publications.png',fullPage:true});
+ await page.getByRole('tab',{name:'Skills',exact:true}).click();
+ await page.screenshot({path:'/tmp/haolin-static-profile.png',fullPage:true});
  await page.goto('http://localhost:4173/#contact');
  await page.getByRole('heading',{name:'Let’s connect',exact:true}).waitFor();
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Profile tabs cause horizontal overflow');
